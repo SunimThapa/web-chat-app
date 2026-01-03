@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
     },
     activationToken: String ,
     expiryTime: Date,
-   image:{ 
+   profilePicture:{ 
        publicId:String,
         url: String,
         thumbUrl:String

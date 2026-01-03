@@ -1,4 +1,6 @@
 const bodyValidator =(rules)=>{
+
+    
     return async (req, res, next)=>{
         try{
             const payload = req.body;
@@ -13,17 +15,24 @@ const bodyValidator =(rules)=>{
             next()
         }catch(execption){
             console.log("Joi Error: ", execption);
-            let error= {
-                code: 400,
-                message: "validation error",
-                status: "VALIDATION_FAILED",
-                details: {}
-            }
-            execption.details.map((errorObj)=>{
-                let field = errorObj.path.pop();
-                error.details[field]= errorObj.message
-            });
-            next(error);
+
+const error = {
+  code: 400,
+  message: "validation error",
+  status: "VALIDATION_FAILED",
+  details: {}
+};
+
+// ✅ Only process if this is a Joi validation error
+if (execption.isJoi && Array.isArray(execption.details)) {
+  execption.details.forEach((errorObj) => {
+    // safer: take the first element of the path instead of popping
+    const field = errorObj.path[0];
+    error.details[field] = errorObj.message;
+  });
+}
+
+next(error);
         }
     }
 }

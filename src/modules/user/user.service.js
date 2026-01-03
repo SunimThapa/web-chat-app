@@ -9,12 +9,25 @@ class UserService {
         try{
             const data =req.body
             if (req.file) {
-             data.image = await fileUploadSvc.uploadFile(req.file.path, '/users');
+             data.profilePicture = await fileUploadSvc.uploadFile(req.file.path, '/users');
             }
             data.password = bcrypt.hashSync(data.password, 12);
             data.activationToken = randomStringGenerator(150);
             data.expiryTime = new Date(Date.now() + 3600000);
             data.status = Status.ACTIVE ;
+            return data;
+        }catch(exception){
+            throw exception;
+        }
+    }
+    async transformUserUpdate(req, user){
+        try{
+            const data =req.body
+            if (req.file) {
+             data.profilePicture = await fileUploadSvc.uploadFile(req.file.path, '/users');
+            }else {
+                data.profilePicture = user.profilePicture;
+            }
             return data;
         }catch(exception){
             throw exception;
@@ -37,9 +50,48 @@ class UserService {
                 throw exception;
             }
         }
+        async getAllRowsByFilter(filter, {page = 1, limit = 15}) {
+            try{
+                let skip = (page - 1) * limit;
+                const data = await UserModel.find(filter)
+                .sort({name: "asc"})
+                .skip(skip)
+                .limit(limit)
+                const count = await UserModel.countDocuments(filter);
+                return {
+                    rows: data.map(this.getUserPublicProfile),
+                    pagination: {
+                        page: page,
+                        limit: limit,
+                        total: count,
+                    }
+                }
+    
+            }catch(exception){
+                throw exception;
+            }
+        }
+    async updateUserById(filter,data){
+            try{
+                const update= await UserModel.findOneAndUpdate(filter, {$set: data}, {new: true})
+                return update;
+            }
+            catch(exception){
+                throw exception;
+            }
+        }
+    async deleteUserById(filter){
+            try{
+                const deleted = await UserModel.findOneAndDelete(filter);
+                return deleted;
+            }
+            catch(exception){
+                throw exception;
+            }
+        }
+    
         getUserPublicProfile(user) {
         return {
-                
                     name:user.name,
                     email: user.email,
                     gender: user.gender,
@@ -47,7 +99,7 @@ class UserService {
                     dob: user.dob,
                     status: user.status,
                     _id: user._id,
-                    publicProfile:user?.publicProfile?.thumbUrl,
+                    profilePicture:user?.profilePicture?.thumbUrl,
         }
     }
 }

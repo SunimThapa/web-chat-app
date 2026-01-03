@@ -9,6 +9,22 @@ class AuthService {
             throw exception;
         }   
     }
+    async getSingleRowByFilter (filter) {
+        try {
+            const sessionData = await SessionModel.findOne(filter);
+            return sessionData;
+        } catch (exception) {
+            throw exception;
+        }
+    }
+    async deleteMultipleSessionData (filter) {
+        try {
+            const del = await SessionModel.deleteMany(filter);
+            return del;
+        } catch (exception) {
+            throw exception;
+        }
+    }
 }
 const authSvc = new AuthService();
 module.exports = authSvc;
