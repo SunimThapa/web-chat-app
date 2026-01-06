@@ -157,9 +157,54 @@ async groupLeave(req, res, next) {
     next(exception);
   }
 }
+async addMembers(req, res, next){
+  try{
+    const chatId = req.params.chatId;
+    const loggedInUserId= req.loggedInUser._id;
+    const newMemberId= req.body.id;
+    if (!Array.isArray(newMemberId) || !newMemberId.length) {
+    throw { status: 400, message: "No members to add" };
+}
 
+    const result = await chatSvc.getNewAddedMembersById(chatId, newMemberId);
+    res.json({
+      data: result,
+      message:"Members added",
+      status: "MEMBERS_ADDED_SUCCESSFULLY"
+    })
+  }catch(exception){
+    next(exception)
+  }
+}
+async removeMembers(req, res,next){
+  try{
+    const chatId = req.params.chatId;
+    const loggedInUserId = req.loggedInUser._id;
+    const delmemberId = req.body.id;
+    if (loggedInUserId.toString() === delmemberId) {
+  throw {
+    status: 400,
+    message: "Admin cannot remove itself from the group"
+  };
+}
+    const groupDetails= await chatSvc.getGroupDetailsById(chatId);
+    if(groupDetails.admin.toString()===loggedInUserId.toString()){
+      const result = await chatSvc.deleteMembersById(chatId, delmemberId)
+      res.json({
+        data: result,
+        message: "Member removed",
+        status: "MEMBER_REMOVED_SUCCESSFULY"
+      })
+    }
+    throw{
+      status: 403,
+      message: "access denied"
+    }
 
-
+  }catch(exception){
+    next(exception);
+  }
+}
 }
 const chatCtrl = new ChatController();
 module.exports = chatCtrl;

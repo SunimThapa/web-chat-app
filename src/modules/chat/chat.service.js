@@ -67,6 +67,32 @@ async deleteChatById(chatId){
         throw exception;
     }
 }
+async getNewAddedMembersById(chatId, newMemberId){
+    try{
+        const result = await ChatModel.findOneAndUpdate(
+            {_id: chatId, isGroup: true}, 
+            {$addToSet: {members: {$each: newMemberId}}},
+            {new: true}
+        );
+        return{
+            id:result._id,
+            members: result.members
+        }
+    }catch(exception){
+        throw exception;
+    }
+    
+}
+async deleteMembersById(chatId, delmemberId){
+    try{
+        const result = await ChatModel.updateOne({_id: chatId, isGroup: true}, {$pull: {members:delmemberId}})
+        return{
+            delete_id: delmemberId,
+        }
+    }catch(exception){
+        throw exception;
+    }
+}
 }
 const chatSvc = new ChatService();
 module.exports = chatSvc;
