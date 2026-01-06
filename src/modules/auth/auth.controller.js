@@ -4,7 +4,8 @@ const { Status } = require("../../config/constant");
 const { randomStringGenerator } = require("../../utilities/helper");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
-const authSvc=require("./auth.service")
+const authSvc=require("./auth.service");
+const authMailSvc = require('./auth.mail');
 
 class AuthController {
      registeruser= async (req, res, next)=>{
@@ -12,6 +13,7 @@ class AuthController {
         const data = await userSvc.transformUserRegister(req);
         const user = await userSvc.userRegister(data);
         
+        await authMailSvc.notifyUserRegistration(data);
         res.json({
             data: user,
             message: "Your account has been registered successflly",
