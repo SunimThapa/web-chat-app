@@ -1,4 +1,5 @@
 const {CloudinaryConfig} = require("../config/config")
+const fs = require("fs")
 
 
 const cloudinary = require('cloudinary').v2;
@@ -21,6 +22,7 @@ fileUpload =async (filepath, dir='/')=>{
     { transformation: [
       { responsive: true, width: 1024, crop: "scale", fetch_format: "auto" }, 
     ]})
+        fs.unlinkSync(filepath);
       return{
         publicId:public_id,
         url: secure_url,
